@@ -30,7 +30,7 @@ class Etsy extends Module {
 
 
    //on the front office
-//when product page is displayed and the product has already been sold from etsy, update the quantity
+   //when product page is displayed and the product has already been sold from etsy, update the quantity
 //when product has been sold on prestashop, update the etsy product
 
     public function  getContent() {
