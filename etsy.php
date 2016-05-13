@@ -18,6 +18,13 @@ class Etsy extends Module {
 
     public function install()
     {
+        $db = Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS '._DB_PREFIX_.'etsy_ps(
+            id_etsy_ps int(11) not null auto_increment,
+            id_product int(11) not null,
+            id_etsy int(11) not null,
+            PRIMARY KEY (id_etsy_ps)
+        ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+
         return parent::install() && $this->registerHook('leftColumn') && $this->registerHook('');
     }
 
