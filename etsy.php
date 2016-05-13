@@ -25,7 +25,7 @@ class Etsy extends Module {
             PRIMARY KEY (id_etsy_ps)
         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 
-        return parent::install() && $this->registerHook('leftColumn') && $this->registerHook('');
+        return parent::install();// && $this->registerHook('leftColumn') && $this->registerHook('');
     }
 
     public function uninstall()
