@@ -39,7 +39,7 @@ class Etsy extends Module {
 //when cliicking on the row, show the option to remove the product or to add the product
         $etsy = new EtsyAPI('0f9qw3ig8eis8gsh09cb9gzq');
         $products = $etsy->getEtsyProduct();
-        $html = '<table style="border-collapse: collapse; border: 1px solid black; width: 100%;">
+        $html = '<table class="table table-striped">
                     <tr>
                         <th>ID</th>
                         <th>Title</th>
