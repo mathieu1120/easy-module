@@ -39,7 +39,7 @@ class Etsy extends Module {
 //when cliicking on the row, show the option to remove the product or to add the product
         $etsy = new EtsyAPI('0f9qw3ig8eis8gsh09cb9gzq');
         $products = $etsy->getEtsyProduct();
-        $html = '<table style="border-collapse: collapse; border: 1px solid black;">
+        $html = '<table style="border-collapse: collapse; border: 1px solid black; width: 100%;">
                     <tr>
                         <th>ID</th>
                         <th>Title</th>
@@ -49,7 +49,7 @@ class Etsy extends Module {
         foreach ($products as $product) {
             $html .= '<tr>
                         <th>'.$product->listing_id.'</th>
-                        <th>'.(strlen($product->title) > 50 ? substr($product->title, 0, 50).'...' : $product->title).'</th>
+                        <th>'.(strlen($product->title) > 100 ? substr($product->title, 0, 100).'...' : $product->title).'</th>
                         <th>'.$product->price.'</th>
                         <th>'.date('Y-m-d H:i:s', strtotime($product->creation_tsz)).'</th>
                     </tr>';
