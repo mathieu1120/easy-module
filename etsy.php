@@ -66,8 +66,8 @@ class EtsyAPI {
         $this->api_string = $api_string;
     }
 
-    public function getEtsyProduct() {
-        $url = "https://openapi.etsy.com/v2/shops/ShopRachaels/listings/active?api_key=".$this->api_string.'&sort_on=created&sort_order=down&limit=0';
+    public function getEtsyProduct($offset = 0,$limit = 1000) {
+        $url = "https://openapi.etsy.com/v2/shops/ShopRachaels/listings/active?api_key=".$this->api_string.'&sort_on=created&sort_order=down&limit='.$limit.'&offset='.$offset;
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response_body = curl_exec($ch);
