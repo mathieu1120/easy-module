@@ -46,19 +46,23 @@ class Etsy extends Module {
 //when cliicking on the row, show the option to remove the product or to add the product
         $etsy = new EtsyAPI('0f9qw3ig8eis8gsh09cb9gzq');
         $products = $etsy->getEtsyProduct();
-        $html = '<table class="table table-striped">
+        $html = '<h4>Etsy products:</h4><table class="table table-striped">
                     <tr>
                         <th>ID</th>
                         <th>Title</th>
                         <th>Price</th>
                         <th>created at</th>
+                        <th>Action</th>
                     </tr>';
+        $etsyProduct = Db::getInstance()->execute('SELECT * FROM '._DB_PREFIX_.'etsy_ps');
+
         foreach ($products as $product) {
             $html .= '<tr>
                         <th>'.$product->listing_id.'</th>
                         <th>'.(strlen($product->title) > 100 ? substr($product->title, 0, 100).'...' : $product->title).'</th>
                         <th>'.$product->price.'</th>
                         <th>'.date('Y-m-d H:i:s', $product->creation_tsz).'</th>
+                        <th><a>Add</a><a>Remove</a></th>
                     </tr>';
         }
         return $html.'</table';
