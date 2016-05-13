@@ -46,11 +46,10 @@ class Etsy extends Module {
                         <th>Price</th>
                         <th>created at</th>
                     </tr>';
-        p($products);
         foreach ($products as $product) {
             $html .= '<tr>
                         <th>'.$product->listing_id.'</th>
-                        <th>'.strlen($product->title) > 50 ? substr($product->title, 0, 50).'...' : $product->title.'</th>
+                        <th>'.(strlen($product->title) > 50 ? substr($product->title, 0, 50).'...' : $product->title).'</th>
                         <th>'.$product->price.'</th>
                         <th>'.date('Y-m-d H:i:s', strtotime($product->creation_tsz)).'</th>
                     </tr>';
