@@ -51,7 +51,7 @@ class Etsy extends Module {
                         <th>'.$product->listing_id.'</th>
                         <th>'.(strlen($product->title) > 100 ? substr($product->title, 0, 100).'...' : $product->title).'</th>
                         <th>'.$product->price.'</th>
-                        <th>'.date('Y-m-d H:i:s', strtotime($product->creation_tsz)).'</th>
+                        <th>'.date('Y-m-d H:i:s', $product->creation_tsz).'</th>
                     </tr>';
         }
         return $html.'</table';
