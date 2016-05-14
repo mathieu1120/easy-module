@@ -38,7 +38,7 @@ class Etsy extends Module {
 
    //on the front office
    //when product page is displayed and the product has already been sold from etsy, update the quantity
-//when product has been sold on prestashop, update the etsy product
+    //when product has been sold on prestashop, update the etsy product
 
     public function  getContent() {
 //in config page, show list of product that are on etsy and color the raws of product that are not in prestashop
@@ -62,7 +62,7 @@ class Etsy extends Module {
                         <th>'.(strlen($product->title) > 100 ? substr($product->title, 0, 100).'...' : $product->title).'</th>
                         <th>'.$product->price.'</th>
                         <th>'.date('Y-m-d H:i:s', $product->creation_tsz).'</th>
-                        <th><a>Add</a><a>Remove</a></th>
+                        <th><a href="'.AdminController::$currentIndex.'&configure='.$this->name.'&sync_product='.$product->listing_id.'">Add</a><a>Remove</a></th>
                     </tr>';
         }
         return $html.'</table';
