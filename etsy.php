@@ -64,7 +64,7 @@ class Etsy extends Module {
                     $catName = $etsyProduct->category_path[$key];
                     $catParent = $parentCategoryPs;
                     $category = new Category();
-                    d($category->gteFieldsLang());
+                    d($category->getFieldsLang());
                     //$category->name
                 }
                 $parentCategoryPs = $cat['id_category'];
