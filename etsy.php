@@ -44,7 +44,14 @@ class Etsy extends Module {
 //in config page, show list of product that are on etsy and color the raws of product that are not in prestashop
 // do the same thing with product that are on prestashop but not on etsy
 //when cliicking on the row, show the option to remove the product or to add the product
-        $etsy = new EtsyAPI('0f9qw3ig8eis8gsh09cb9gzq');
+        $etsy = new EtsyAPI();
+        $products = $etsy->getEtsyProduct();
+        d($products);
+        if ($etsyListingId = Tools::getValue('sync_product')) {
+
+        }
+
+        $etsy = new EtsyAPI();
         $products = $etsy->getEtsyProduct();
         $html = '<h4>Etsy products:</h4><table class="table table-striped">
                     <tr>
@@ -71,11 +78,7 @@ class Etsy extends Module {
 
 class EtsyAPI {
 
-    private $api_string;
-
-    public function __construct($api_string) {
-        $this->api_string = $api_string;
-    }
+    private $api_string = '0f9qw3ig8eis8gsh09cb9gzq';
 
     public function getEtsyProduct($offset = 0,$limit = 1000) {
         $url = "https://openapi.etsy.com/v2/shops/ShopRachaels/listings/active?api_key=".$this->api_string.'&sort_on=created&sort_order=down&limit='.$limit.'&offset='.$offset;
