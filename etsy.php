@@ -45,14 +45,11 @@ class Etsy extends Module {
 // do the same thing with product that are on prestashop but not on etsy
 //when cliicking on the row, show the option to remove the product or to add the product
         $etsy = new EtsyAPI();
-        $products = $etsy->getEtsyProduct();
-        d($products);
+        $products = $etsy->getEtsyProductByListingId(getEtsyProduct());
         if ($etsyListingId = Tools::getValue('sync_product')) {
-
+            d($products[$etsyListingId]);
         }
 
-        $etsy = new EtsyAPI();
-        $products = $etsy->getEtsyProduct();
         $html = '<h4>Etsy products:</h4><table class="table table-striped">
                     <tr>
                         <th>ID</th>
@@ -88,5 +85,13 @@ class EtsyAPI {
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $result = json_decode($response_body);
         return $result->results;
+    }
+
+    public function getEtsyProductByListingId($products) {
+        $p = [];
+        foreach ($products as $product) {
+            $p[$product->listing_id] = $product;
+        }
+        return $p;
     }
 }
