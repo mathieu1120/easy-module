@@ -18,12 +18,20 @@ class Etsy extends Module {
 
     public function install()
     {
-        $db = Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS '._DB_PREFIX_.'etsy_ps(
-            id_etsy_ps int(11) not null auto_increment,
-            id_product int(11) not null,
-            id_etsy int(11) not null,
-            PRIMARY KEY (id_etsy_ps)
+        $db = Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS '._DB_PREFIX_.'etsy_ps_product(
+            id_etsy_ps_product int(11) not null auto_increment,
+            id_ps_product int(11) not null,
+            id_etsy_product int(11) not null,
+            PRIMARY KEY (id_etsy_ps_product)
         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+
+        $db = Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS '._DB_PREFIX_.'etsy_ps_category(
+            id_etsy_ps_category int(11) not null auto_increment,
+            id_ps_category int(11) not null,
+            id_etsy_catgory int(11) not null,
+            PRIMARY KEY (id_etsy_ps_category)
+        ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+
 
         return parent::install();// && $this->registerHook('leftColumn') && $this->registerHook('');
     }
@@ -47,7 +55,23 @@ class Etsy extends Module {
         $etsy = new EtsyAPI();
         $products = $etsy->getEtsyProductByListingId($etsy->getEtsyProduct());
         if ($etsyListingId = Tools::getValue('sync_product')) {
-            d($products[$etsyListingId]);
+            $etsyProduct = $products[$etsyListingId];
+            $parentCategoryPs = null;
+            foreach ($etsyProduct->category_path_ids as $key => $id) {
+                $cat = Db::getInstance()->getRow('SELECT * FROM '._DB_PREFIX_.'etsy_ps_category WHERE id_etsy_category = '.(int)$id);
+                if (!$cat) {
+                    //create category
+                    $catName = $etsyProduct->category_path[$key];
+                    $catParent = $parentCategoryPs;
+                    $category = new Category();
+                    d($category->gteFieldsLang());
+                    //$category->name
+                }
+                $parentCategoryPs = $cat['id_category'];
+            }
+
+
+
         }
 
         $html = '<h4>Etsy products:</h4><table class="table table-striped">
@@ -58,7 +82,7 @@ class Etsy extends Module {
                         <th>created at</th>
                         <th>Action</th>
                     </tr>';
-        $etsyProduct = Db::getInstance()->execute('SELECT * FROM '._DB_PREFIX_.'etsy_ps');
+        $etsyProducts = Db::getInstance()->execute('SELECT * FROM '._DB_PREFIX_.'etsy_ps');
 
         foreach ($products as $product) {
             $html .= '<tr>
@@ -77,14 +101,18 @@ class EtsyAPI {
 
     private $api_string = '0f9qw3ig8eis8gsh09cb9gzq';
 
-    public function getEtsyProduct($offset = 0,$limit = 1000) {
-        $url = "https://openapi.etsy.com/v2/shops/ShopRachaels/listings/active?api_key=".$this->api_string.'&sort_on=created&sort_order=down&limit='.$limit.'&offset='.$offset;
+    private function _curlMeThis($url) {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response_body = curl_exec($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $result = json_decode($response_body);
         return $result->results;
+    }
+
+    public function getEtsyProduct($offset = 0,$limit = 1000) {
+        $url = "https://openapi.etsy.com/v2/shops/ShopRachaels/listings/active?api_key=".$this->api_string.'&sort_on=created&sort_order=down&limit='.$limit.'&offset='.$offset;
+        return $this->_curlMeThis($url);
     }
 
     public function getEtsyProductByListingId($products) {
