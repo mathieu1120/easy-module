@@ -74,14 +74,21 @@ class Etsy extends Module {
                         'id_ps_category' => (int)$category->id,
                         'id_etsy_category' => (int)$id
                     ]);
+                    $parentCategoryPs = Db::getInstance()->Insert_ID();
+                } else {
+                    $parentCategoryPs = $cat['id'];
                 }
-                $parentCategoryPs = $cat['id_category'];
             }
-            /*$newProduct = new Product();
-            $newProduct->name = $etsyProduct->name;
+            $newProduct = new Product();
+            $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->name;
             $newProduct->price = $etsyProduct->price;
-            $newProduct->link_rewrite = $etsyProduct->link_rewrite;
-*/
+            $newProduct->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->link_rewrite;
+            $newProduct->id_category_default = $parentCategoryPs;
+            $newProduct->add();
+            Db::getInstance()->insert('etsy_ps_product', [
+                'id_ps_product' => (int)$newProduct->id,
+                'id_etsy_product' => (int)$etsyProduct->listing_id
+            ]);
         }
 
         $html = '<h4>Etsy products:</h4><table class="table table-striped">
@@ -92,7 +99,10 @@ class Etsy extends Module {
                         <th>created at</th>
                         <th>Action</th>
                     </tr>';
-        $etsyProducts = Db::getInstance()->execute('SELECT * FROM '._DB_PREFIX_.'etsy_ps');
+        $etsyProducts = Db::getInstance()->execute('SELECT * FROM '._DB_PREFIX_.'etsy_ps_product');
+        foreach ($etsyProducts as $p) {
+            $etsyProducts[$p['id_etsy_product']] = $p;
+        }
 
         foreach ($products as $product) {
             $html .= '<tr>
@@ -100,7 +110,7 @@ class Etsy extends Module {
                         <th>'.(strlen($product->title) > 100 ? substr($product->title, 0, 100).'...' : $product->title).'</th>
                         <th>'.$product->price.'</th>
                         <th>'.date('Y-m-d H:i:s', $product->creation_tsz).'</th>
-                        <th><a href="'.AdminController::$currentIndex.'&configure='.$this->name.'&sync_product='.$product->listing_id.'&token='.Tools::getAdminTokenLite('AdminModules').'">Add</a><a>Remove</a></th>
+                        <th>'.($etsyProducts[$product->listing_id] ? '' : '<a href="'.AdminController::$currentIndex.'&configure='.$this->name.'&sync_product='.$product->listing_id.'&token='.Tools::getAdminTokenLite('AdminModules').'">Add</a>').'<a>Remove</a></th>
                     </tr>';
         }
         return $html.'</table';
