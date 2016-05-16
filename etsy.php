@@ -62,7 +62,7 @@ class Etsy extends Module {
                 if (!$cat) {
                     //create category
                     $category = new Category();
-                    $category->name = $etsyProduct->category_path[$key];
+                    $category->name[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->category_path[$key];
                     $category->link_rewrite = $etsyProduct->category_path[$key];
                     if ($parentCategoryPs) {
                         $category->id_parent = $parentCategoryPs;
