@@ -67,7 +67,7 @@ class Etsy extends Module {
                     if ($parentCategoryPs) {
                         $category->id_parent = $parentCategoryPs;
                     } else {
-                        $category->id_parent = 2try to fix to add catebor;
+                        $category->id_parent = 2;
                     }
                     $category->add();
                     Db::getInstance()->insert('etsy_ps_category', [
