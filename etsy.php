@@ -63,7 +63,7 @@ class Etsy extends Module {
                     //create category
                     $category = new Category();
                     $category->name[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->category_path[$key];
-                    $category->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->category_path[$key];
+                    $category->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = str_replace(['.', ' '], '_', $etsyProduct->category_path[$key]);
                     if ($parentCategoryPs) {
                         $category->id_parent = $parentCategoryPs;
                     } else {
@@ -82,7 +82,7 @@ class Etsy extends Module {
             $newProduct = new Product();
             $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->name;
             $newProduct->price = $etsyProduct->price;
-            $newProduct->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->link_rewrite;
+            $newProduct->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = str_replace(['.', ' '], '_', $etsyProduct->name);
             $newProduct->id_category_default = $parentCategoryPs;
             $newProduct->add();
             Db::getInstance()->insert('etsy_ps_product', [
