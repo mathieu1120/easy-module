@@ -47,6 +47,7 @@ class Etsy extends Module {
    //on the front office
    //when product page is displayed and the product has already been sold from etsy, update the quantity
     //when product has been sold on prestashop, update the etsy product
+    //have a cron job that check if the product has been sold on etsy
 
     public function  getContent() {
 //in config page, show list of product that are on etsy and color the raws of product that are not in prestashop
