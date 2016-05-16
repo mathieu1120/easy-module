@@ -66,9 +66,11 @@ class Etsy extends Module {
                     $category->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->category_path[$key];
                     if ($parentCategoryPs) {
                         $category->id_parent = $parentCategoryPs;
+                    } else {
+                        $category->id_parent = 2try to fix to add catebor;
                     }
                     $category->add();
-                    Db::getInstance()->insert(_DB_PREFIX_.'etsy_ps_category', [
+                    Db::getInstance()->insert('etsy_ps_category', [
                         'id_ps_category' => (int)$category->id,
                         'id_etsy_category' => (int)$id
                     ]);
