@@ -79,6 +79,7 @@ class Etsy extends Module {
                     $parentCategoryPs = $cat['id'];
                 }
             }
+            d($etsyProduct);
             $newProduct = new Product();
             $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->name;
             $newProduct->price = $etsyProduct->price;
