@@ -79,11 +79,12 @@ class Etsy extends Module {
                     $parentCategoryPs = $cat['id'];
                 }
             }
-            d($etsyProduct);
+
             $newProduct = new Product();
-            $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->name;
+            $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->title;
             $newProduct->price = $etsyProduct->price;
-            $newProduct->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = str_replace(['.', ' '], '_', $etsyProduct->name);
+            $newProduct->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = str_replace(['.', ' '], '_', $etsyProduct->title);
+            $newProduct->description[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->description;
             $newProduct->id_category_default = $parentCategoryPs;
             $newProduct->add();
             Db::getInstance()->insert('etsy_ps_product', [
