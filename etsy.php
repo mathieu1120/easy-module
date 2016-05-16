@@ -28,7 +28,7 @@ class Etsy extends Module {
         $db = Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS '._DB_PREFIX_.'etsy_ps_category(
             id_etsy_ps_category int(11) not null auto_increment,
             id_ps_category int(11) not null,
-            id_etsy_catgory int(11) not null,
+            id_etsy_category int(11) not null,
             PRIMARY KEY (id_etsy_ps_category)
         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 
