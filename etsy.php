@@ -61,17 +61,25 @@ class Etsy extends Module {
                 $cat = Db::getInstance()->getRow('SELECT * FROM '._DB_PREFIX_.'etsy_ps_category WHERE id_etsy_category = '.(int)$id);
                 if (!$cat) {
                     //create category
-                    $catName = $etsyProduct->category_path[$key];
-                    $catParent = $parentCategoryPs;
                     $category = new Category();
-                    d($category->getFieldsLang());
-                    //$category->name
+                    $category->name = $etsyProduct->category_path[$key];
+                    $category->link_rewrite = $etsyProduct->category_path[$key];
+                    if ($parentCategoryPs) {
+                        $category->id_parent = $parentCategoryPs;
+                    }
+                    $category->add();
+                    Db::getInstance()->insert(_DB_PREFIX_.'etsy_ps_category', [
+                        'id_ps_category' => (int)$category->id,
+                        'id_etsy_category' => (int)$id
+                    ]);
                 }
                 $parentCategoryPs = $cat['id_category'];
             }
-
-
-
+            /*$newProduct = new Product();
+            $newProduct->name = $etsyProduct->name;
+            $newProduct->price = $etsyProduct->price;
+            $newProduct->link_rewrite = $etsyProduct->link_rewrite;
+*/
         }
 
         $html = '<h4>Etsy products:</h4><table class="table table-striped">
