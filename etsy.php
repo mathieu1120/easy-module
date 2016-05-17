@@ -103,7 +103,7 @@ class Etsy extends Module {
                         <th>Action</th>
                     </tr>';
 
-        $psEtsyProducts = Db::getInstance()->execute('SELECT * FROM '._DB_PREFIX_.'etsy_ps_product');
+        $psEtsyProducts = Db::getInstance()->executeS('SELECT * FROM '._DB_PREFIX_.'etsy_ps_product');
 
 d($psEtsyProducts);
         $etsyProducts= [];
