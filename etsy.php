@@ -102,12 +102,15 @@ class Etsy extends Module {
                         <th>created at</th>
                         <th>Action</th>
                     </tr>';
+
         $psEtsyProducts = Db::getInstance()->execute('SELECT * FROM '._DB_PREFIX_.'etsy_ps_product');
+
+d($psEtsyProducts);
         $etsyProducts= [];
         foreach ($psEtsyProducts as $p) {
             $etsyProducts[$p['id_etsy_product']] = $p;
         }
-d($etsyProducts);
+
         foreach ($products as $product) {
             $html .= '<tr>
                         <th>'.$product->listing_id.'</th>
