@@ -81,7 +81,7 @@ class Etsy extends Module {
                 }
             }
 
-            $newProduct = $this->addPSProduct($etsyProduct);
+            $newProduct = $this->addPSProduct($etsyProduct, $parentCategoryPs);
 
             Db::getInstance()->insert('etsy_ps_product', [
                 'id_ps_product' => (int)$newProduct->id,
@@ -117,15 +117,23 @@ class Etsy extends Module {
         return $html.'</table';
     }
 
-    private function addPSProduct($etsyProduct) {
-        d($etsyProduct);
+    private function addPSProduct($etsyProduct, $parentCategoryPs) {
         $newProduct = new Product();
         $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->title;
         $newProduct->price = $etsyProduct->price;
         $newProduct->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = str_replace([' ', '/'], '_', strip_tags(html_entity_decode($etsyProduct->title)));
+        d($etsyProduct->description);
         $newProduct->description[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->description;
         $newProduct->id_category_default = $parentCategoryPs;
+        $newProduct->quantity = $etsyProduct->quantity;
+        $newProduct->weight = $etsyProduct->item_weight;
+        $newProduct->depth = $etsyProduct->length;
+        $newProduct->width = $etsyProduct->width;
+        $newProduct->height = $etsyProduct->height;
+
+
         $newProduct->add();
+        Tag::addTags(Configuration::get('PS_LANG_DEFAULT'), $newProduct->id, $etsyProduct->tags);
         return $newProduct;
     }
 }
