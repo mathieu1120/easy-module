@@ -83,13 +83,15 @@ class Etsy extends Module {
             }
 
             $newProduct = $this->addPSProduct($etsyProduct, $parentCategoryPs);
-            $images = $etsy->getEtsyProductImages($newProduct->id);
-            d($images);
 
             Db::getInstance()->insert('etsy_ps_product', [
                 'id_ps_product' => (int)$newProduct->id,
                 'id_etsy_product' => (int)$etsyProduct->listing_id
             ]);
+
+            $images = $etsy->getEtsyProductImages($newProduct->id);
+            d($images);
+
         }
 
         $html = '<h4>Etsy products:</h4><table class="table table-striped">
@@ -122,6 +124,7 @@ class Etsy extends Module {
 
     private function addPSProduct($etsyProduct, $parentCategoryPs) {
         $newProduct = new Product();
+        d($etsyProduct);
         $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = substr($etsyProduct->title, 0, 128);
         $newProduct->price = $etsyProduct->price;
         $newProduct->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->listing_id;
