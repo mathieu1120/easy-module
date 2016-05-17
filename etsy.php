@@ -1,6 +1,7 @@
 <?php
 
 class Etsy extends Module {
+
     public function __construct()
     {
         $this->name = 'etsy';
@@ -82,6 +83,8 @@ class Etsy extends Module {
             }
 
             $newProduct = $this->addPSProduct($etsyProduct, $parentCategoryPs);
+            $images = $etsy->getEtsyProductImages($newProduct->id);
+            d($images);
 
             Db::getInstance()->insert('etsy_ps_product', [
                 'id_ps_product' => (int)$newProduct->id,
@@ -119,13 +122,13 @@ class Etsy extends Module {
 
     private function addPSProduct($etsyProduct, $parentCategoryPs) {
         $newProduct = new Product();
-        d($etsyProduct);
         $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = substr($etsyProduct->title, 0, 128);
         $newProduct->price = $etsyProduct->price;
         $newProduct->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->listing_id;
         $newProduct->description[(int)Configuration::get('PS_LANG_DEFAULT')] = nl2br($etsyProduct->description);
         $newProduct->id_category_default = $parentCategoryPs;
         $newProduct->quantity = $etsyProduct->quantity;
+
         $newProduct->weight = $etsyProduct->item_weight;
         $newProduct->depth = $etsyProduct->length;
         $newProduct->width = $etsyProduct->width;
@@ -134,6 +137,7 @@ class Etsy extends Module {
 
         $newProduct->add();
         Tag::addTags(Configuration::get('PS_LANG_DEFAULT'), $newProduct->id, $etsyProduct->tags);
+        StockAvailable::setQuantity($newProduct->id, null, $etsyProduct->quantity);
         return $newProduct;
     }
 }
@@ -162,5 +166,10 @@ class EtsyAPI {
             $p[$product->listing_id] = $product;
         }
         return $p;
+    }
+
+    public function getEtsyProductImages($listingId) {
+        $url = "https://openapi.etsy.com/v2/shops/ShopRachaels/listings/".$listingId."/images?api_key=".$this->api_string;
+        return $this->_curlMeThis($url);
     }
 }
