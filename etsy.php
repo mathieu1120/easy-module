@@ -172,6 +172,7 @@ class EtsyAPI {
 
     public function getEtsyProductImages($listingId) {
         $url = "https://openapi.etsy.com/v2/shops/ShopRachaels/listings/".$listingId."/images?api_key=".$this->api_string;
+        d($url);
         return $this->_curlMeThis($url);
     }
 }
