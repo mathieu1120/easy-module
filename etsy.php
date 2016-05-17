@@ -89,7 +89,7 @@ class Etsy extends Module {
                 'id_etsy_product' => (int)$etsyProduct->listing_id
             ]);
 
-            $images = $etsy->getEtsyProductImages($newProduct->id);
+            $images = $etsy->getEtsyProductImages($etsyProduct->listing_id);
             d($images);
 
         }
