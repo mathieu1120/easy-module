@@ -109,7 +109,7 @@ class Etsy extends Module {
         foreach ($psEtsyProducts as $p) {
             $etsyProducts[$p['id_etsy_product']] = $p;
         }
-d($etsyProducts);
+
         foreach ($products as $product) {
             $html .= '<tr>
                         <th>'.$product->listing_id.'</th>
