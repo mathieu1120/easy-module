@@ -124,8 +124,7 @@ class Etsy extends Module {
 
     private function addPSProduct($etsyProduct, $parentCategoryPs) {
         $newProduct = new Product();
-        d($etsyProduct);
-        $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = substr($etsyProduct->title, 0, 128);
+        $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = substr(pSQL($etsyProduct->title), 0, 128);
         $newProduct->price = $etsyProduct->price;
         $newProduct->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->listing_id;
         $newProduct->description[(int)Configuration::get('PS_LANG_DEFAULT')] = nl2br($etsyProduct->description);
