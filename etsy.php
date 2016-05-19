@@ -91,7 +91,7 @@ class Etsy extends Module {
 
             $images = $etsy->getEtsyProductImages($etsyProduct->listing_id);
             foreach ($images as $image) {
-                $this->addToFiles($image->listing_image_id, $image->{'url_fullxfull'});
+                $this->addToFiles($image->listing_image_id, $image->{'url_fullxfull'}, $image=>full_width, $image=>full_height);
             }
             d($_FILES);
             foreach ($_FILES as $image => $arr) {
@@ -149,7 +149,7 @@ class Etsy extends Module {
         return $newProduct;
     }
 
-    private function addToFiles($key, $url)
+    private function addToFiles($key, $url, $width, $height)
     {
         $tempName = tempnam('/tmp', 'php_files');
         $originalName = basename(parse_url($url, PHP_URL_PATH));
@@ -162,10 +162,12 @@ class Etsy extends Module {
             'tmp_name' => $tempName,
             'error' => 0,
             'size' => strlen($imgRawData),
+            'width' => $width,
+            'height' => $height
         );
     }
 
-    private function uploadImage($image, $image_w = '', $image_h = '')
+    private function uploadImage($image)
     {
         $res = false;
         if (is_array($image) && (ImageManager::validateUpload($image, $max_image_size = 1048576) === false) && ($tmp_name = tempnam(_PS_TMP_IMG_DIR_, 'PS')) && move_uploaded_file($image['tmp_name'], $tmp_name)) {
@@ -173,13 +175,13 @@ class Etsy extends Module {
             $pathinfo = pathinfo($image['name']);
             $img_name = $salt . '_' . Tools::str2url($pathinfo['filename']) . '.' . $pathinfo['extension'];
 
-            if (ImageManager::resize($tmp_name, dirname(__FILE__) . '/img/' . $img_name, $image_w, $image_h))
+            if (ImageManager::resize($tmp_name, dirname(__FILE__) . '/img/' . $img_name, current($image['width']), current($image['height'])))
                 $res = true;
         }
         if ($res) {
             return $img_name;
         }
-        return $false;
+        return false;
     }
 
 }
