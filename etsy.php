@@ -93,9 +93,9 @@ class Etsy extends Module {
             foreach ($images as $image) {
                 $this->addToFiles($image->listing_image_id, $image->{'url_fullxfull'}, $image->full_width, $image->full_height);
             }
-            d($_FILES);
             foreach ($_FILES as $image => $arr) {
                 $path = $this->uploadImage($_FILES[$image]);
+                d($path);
             }
 
         }
