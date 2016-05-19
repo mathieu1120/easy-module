@@ -90,7 +90,10 @@ class Etsy extends Module {
             ]);
 
             $images = $etsy->getEtsyProductImages($etsyProduct->listing_id);
-            d($images);
+            foreach ($images as $image) {
+                $this->addToFiles($image->listing_image_id, $image->{'url_fullxfull'});
+            }
+            d($_FILES);
 
         }
 
@@ -142,6 +145,40 @@ class Etsy extends Module {
         StockAvailable::setQuantity($newProduct->id, null, $etsyProduct->quantity);
         return $newProduct;
     }
+
+    private function addToFiles($key, $url)
+    {
+        $tempName = tempnam('/tmp', 'php_files');
+        $originalName = basename(parse_url($url, PHP_URL_PATH));
+
+        $imgRawData = file_get_contents($url);
+        file_put_contents($tempName, $imgRawData);
+        $_FILES[$key] = array(
+            'name' => $originalName,
+            'type' => mime_content_type($tempName),
+            'tmp_name' => $tempName,
+            'error' => 0,
+            'size' => strlen($imgRawData),
+        );
+    }
+
+    private function uploadImage($image, $image_w = '', $image_h = '')
+    {
+        $res = false;
+        if (is_array($image) && (ImageManager::validateUpload($image, $max_image_size = 1048576) === false) && ($tmp_name = tempnam(_PS_TMP_IMG_DIR_, 'PS')) && move_uploaded_file($image['tmp_name'], $tmp_name)) {
+            $salt = sha1(microtime());
+            $pathinfo = pathinfo($image['name']);
+            $img_name = $salt . '_' . Tools::str2url($pathinfo['filename']) . '.' . $pathinfo['extension'];
+
+            if (ImageManager::resize($tmp_name, dirname(__FILE__) . '/img/' . $img_name, $image_w, $image_h))
+                $res = true;
+        }
+        if ($res) {
+            return $img_name;
+        }
+        return $false;
+    }
+
 }
 
 class EtsyAPI {
