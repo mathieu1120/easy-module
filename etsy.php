@@ -138,10 +138,9 @@ class Etsy extends Module {
         $newProduct->quantity = $etsyProduct->quantity;
 
         $newProduct->weight = $etsyProduct->item_weight;
-        $newProduct->depth = $etsyProduct->length;
-        $newProduct->width = $etsyProduct->width;
-        $newProduct->height = $etsyProduct->height;
-
+        $newProduct->depth = $etsyProduct->item_length;
+        $newProduct->width = $etsyProduct->item_width;
+        $newProduct->height = $etsyProduct->item_height;
 
         $newProduct->add();
         Tag::addTags(Configuration::get('PS_LANG_DEFAULT'), $newProduct->id, $etsyProduct->tags);
