@@ -168,22 +168,28 @@ class Etsy extends Module {
 
     private function uploadImage($image)
     {
-        d($image);
         $res = false;
+        $width = $image['width'];
+        unset($image['width']);
+        $height = $image['height'];
+        unset($image['height']);
+
         if (is_array($image)
             && (ImageManager::validateUpload($image, $max_image_size = 1048576) === false)
             && ($tmp_name = tempnam(_PS_TMP_IMG_DIR_, 'PS'))
             && move_uploaded_file($image['tmp_name'], $tmp_name)) {
+            d('here');
             $salt = sha1(microtime());
             $pathinfo = pathinfo($image['name']);
             $img_name = $salt . '_' . Tools::str2url($pathinfo['filename']) . '.' . $pathinfo['extension'];
 
-            if (ImageManager::resize($tmp_name, dirname(__FILE__) . '/img/' . $img_name, current($image['width']), current($image['height'])))
+            if (ImageManager::resize($tmp_name, dirname(__FILE__) . '/img/' . $img_name, $width, $height)))
                 $res = true;
         }
         if ($res) {
             return $img_name;
         }
+        d('why');
         return false;
     }
 
