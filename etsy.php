@@ -183,7 +183,7 @@ class Etsy extends Module {
             $pathinfo = pathinfo($image['name']);
             $img_name = $salt . '_' . Tools::str2url($pathinfo['filename']) . '.' . $pathinfo['extension'];
 
-            if (ImageManager::resize($tmp_name, dirname(__FILE__) . '/img/' . $img_name, $width, $height)))
+            if (ImageManager::resize($tmp_name, dirname(__FILE__) . '/img/' . $img_name, $width, $height))
                 $res = true;
         }
         if ($res) {
