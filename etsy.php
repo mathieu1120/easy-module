@@ -91,13 +91,9 @@ class Etsy extends Module {
 
             $images = $etsy->getEtsyProductImages($etsyProduct->listing_id);
             foreach ($images as $image) {
-                $this->addToFiles($image->listing_image_id, $image->{'url_fullxfull'}, $image->full_width, $image->full_height);
-            }
-            foreach ($_FILES as $image => $arr) {
-                $path = $this->uploadImage($_FILES[$image]);
-                d($path);
-            }
-
+                $path = $this->addToFiles($image->listing_image_id, $image->{'url_fullxfull'}, $image->full_width, $image->full_height);
+            	d($path);
+	    }
         }
 
         $html = '<h4>Etsy products:</h4><table class="table table-striped">
@@ -122,7 +118,7 @@ class Etsy extends Module {
                         <th>'.(strlen($product->title) > 100 ? substr($product->title, 0, 100).'...' : $product->title).'</th>
                         <th>'.$product->price.'</th>
                         <th>'.date('Y-m-d H:i:s', $product->creation_tsz).'</th>
-                        <th>'.($etsyProducts[$product->listing_id] ? '' : '<a href="'.AdminController::$currentIndex.'&configure='.$this->name.'&sync_product='.$product->listing_id.'&token='.Tools::getAdminTokenLite('AdminModules').'">Add</a>').'<a>Remove</a></th>
+                        <th>'.(isset($etsyProducts[$product->listing_id]) ? '' : '<a href="'.AdminController::$currentIndex.'&configure='.$this->name.'&sync_product='.$product->listing_id.'&token='.Tools::getAdminTokenLite('AdminModules').'">Add</a>').'<a>Remove</a></th>
                     </tr>';
         }
         return $html.'</table';
@@ -150,49 +146,22 @@ class Etsy extends Module {
 
     private function addToFiles($key, $url, $width, $height)
     {
-        $tempName = tempnam('/tmp', 'php_files');
+        $tempName = tempnam(_PS_TMP_IMG_DIR_, 'php_files_'.$key);
         $originalName = basename(parse_url($url, PHP_URL_PATH));
-
-        $imgRawData = file_get_contents($url);
+	$imgRawData = file_get_contents($url);    
         file_put_contents($tempName, $imgRawData);
-        $_FILES[$key] = array(
-            'name' => $originalName,
-            'type' => mime_content_type($tempName),
-            'tmp_name' => $tempName,
-            'error' => 0,
-            'size' => strlen($imgRawData),
-            'width' => $width,
-            'height' => $height
-        );
-    }
 
-    private function uploadImage($image)
-    {
-        $res = false;
-        $width = $image['width'];
-        unset($image['width']);
-        $height = $image['height'];
-        unset($image['height']);
-
-        if (is_array($image)
-            && (ImageManager::validateUpload($image, $max_image_size = 1048576) === false)
-            && ($tmp_name = tempnam(_PS_TMP_IMG_DIR_, 'PS'))
-            && move_uploaded_file($image['tmp_name'], $tmp_name)) {
-            d('here');
-            $salt = sha1(microtime());
-            $pathinfo = pathinfo($image['name']);
-            $img_name = $salt . '_' . Tools::str2url($pathinfo['filename']) . '.' . $pathinfo['extension'];
-
-            if (ImageManager::resize($tmp_name, dirname(__FILE__) . '/img/' . $img_name, $width, $height))
-                $res = true;
+	$salt = sha1(microtime());
+        $pathinfo = pathinfo($originalName);
+        $img_name = $salt . '_' . Tools::str2url($pathinfo['filename']) . '.' . $pathinfo['extension'];
+        if (ImageManager::resize($tempName, dirname(__FILE__) . '/img/' . $img_name, $width, $height)) {
+             $res = true;
         }
+
         if ($res) {
-            return $img_name;
+            return dirname(__FILE__) . '/img/' . $img_name;
         }
-        d('why');
-        return false;
     }
-
 }
 
 class EtsyAPI {
