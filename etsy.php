@@ -62,6 +62,7 @@ class Etsy extends Module {
 		   }
             $etsyProduct = $products[$etsyListingId];
             $parentCategoryPs = null;
+	    $parentCategoryList = [];
             foreach ($etsyProduct->category_path_ids as $key => $id) {
                 $cat = Db::getInstance()->getRow('SELECT * FROM '._DB_PREFIX_.'etsy_ps_category WHERE id_etsy_category = '.(int)$id);
                 if (!$cat) {
@@ -83,9 +84,10 @@ class Etsy extends Module {
                 } else {
                     $parentCategoryPs = $cat['id_ps_category'];
                 }
+		$parentCategoryList[] = $parentCategoryPs;
             }
 
-            $newProduct = $this->addPSProduct($etsyProduct, $parentCategoryPs);
+            $newProduct = $this->addPSProduct($etsyProduct, $parentCategoryPs, $parentCategoryList);
 
             Db::getInstance()->insert('etsy_ps_product', [
                 'id_ps_product' => (int)$newProduct->id,
@@ -195,13 +197,14 @@ if (!Image::getCover($image->id_product)) {
         return $html.'</table';
     }
 
-    private function addPSProduct($etsyProduct, $parentCategoryPs) {
+    private function addPSProduct($etsyProduct, $parentCategoryPs, $parentCategoryList = []) {
         $newProduct = new Product();
         $newProduct->name[(int)Configuration::get('PS_LANG_DEFAULT')] = substr(str_replace(['&', ';', '#'], '', $etsyProduct->title), 0, 128);
         $newProduct->price = $etsyProduct->price;
         $newProduct->link_rewrite[(int)Configuration::get('PS_LANG_DEFAULT')] = $etsyProduct->listing_id;
         $newProduct->description[(int)Configuration::get('PS_LANG_DEFAULT')] = nl2br($etsyProduct->description);
         $newProduct->id_category_default = $parentCategoryPs;
+	$newProduct->category = $parentCategoryList;
         $newProduct->quantity = $etsyProduct->quantity;
 
         $newProduct->weight = $etsyProduct->item_weight;
@@ -210,6 +213,7 @@ if (!Image::getCover($image->id_product)) {
         $newProduct->height = $etsyProduct->item_height;
 
         $newProduct->add();
+	$newProduct->updateCategories($parentCategoryList);
         Tag::addTags(Configuration::get('PS_LANG_DEFAULT'), $newProduct->id, $etsyProduct->tags);
         StockAvailable::setQuantity($newProduct->id, null, $etsyProduct->quantity);
         return $newProduct;
