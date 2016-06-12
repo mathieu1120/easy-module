@@ -51,12 +51,15 @@ class Etsy extends Module {
     //have a cron job that check if the product has been sold on etsy
 
     public function  getContent() {
-//in config page, show list of product that are on etsy and color the raws of product that are not in prestashop
-// do the same thing with product that are on prestashop but not on etsy
 //when cliicking on the row, show the option to remove the product or to add the product
         $etsy = new EtsyAPI();
         $products = $etsy->getEtsyProductByListingId($etsy->getEtsyProduct());
+	$html = '';
         if ($etsyListingId = Tools::getValue('sync_product')) {
+	           $psEtsyProductId = Db::getInstance()->getValue('SELECT id_etsy_ps_product FROM '._DB_PREFIX_.'etsy_ps_product where id_etsy_product = '.(int)$etsyListingId);
+		   if ($psEtsyProductId) {
+		      d('product already sync');
+		   }
             $etsyProduct = $products[$etsyListingId];
             $parentCategoryPs = null;
             foreach ($etsyProduct->category_path_ids as $key => $id) {
@@ -78,7 +81,7 @@ class Etsy extends Module {
                     ]);
                     $parentCategoryPs = Db::getInstance()->Insert_ID();
                 } else {
-                    $parentCategoryPs = $cat['id'];
+                    $parentCategoryPs = $cat['id_ps_category'];
                 }
             }
 
@@ -92,11 +95,79 @@ class Etsy extends Module {
             $images = $etsy->getEtsyProductImages($etsyProduct->listing_id);
             foreach ($images as $image) {
                 $path = $this->addToFiles($image->listing_image_id, $image->{'url_fullxfull'}, $image->full_width, $image->full_height);
-            	d($path);
-	    }
-        }
+		$image = new Image();
+		$image->id_product = (int)$newProduct->id;
+		$image->position = Image::getHighestPosition($newProduct->id) + 1;
+if (!Image::getCover($image->id_product)) {
+                $image->cover = 1;
+            	} else {
+                $image->cover = 0;
+            	}
+		if (!$image->add()) {
+		   d('error adding image');
+		} else {
+		   if (!$new_path = $image->getPathForCreation()) {
+                    d('An error occurred during new folder creation');
+                                 }
 
-        $html = '<h4>Etsy products:</h4><table class="table table-striped">
+                $error = 0;
+                if (!ImageManager::resize($path, $new_path.'.'.$image->image_format, null, null, 'jpg', false, $error)) {
+                    switch ($error) {
+                        case ImageManager::ERROR_FILE_NOT_EXIST :
+                            d('An error occurred while copying image, the file does not exist anymore.');
+                            break;
+
+                        case ImageManager::ERROR_FILE_WIDTH :
+                            d('An error occurred while copying image, the file width is 0px.');
+                            break;
+
+                        case ImageManager::ERROR_MEMORY_LIMIT :
+                            d('An error occurred while copying image, check your memory limit.');
+                            break;
+
+                        default:
+                            d('An error occurred while copying image.');
+                            break;
+                    }
+                    continue;
+                } else {
+                    $imagesTypes = ImageType::getImagesTypes('products');
+                    $generate_hight_dpi_images = (bool)Configuration::get('PS_HIGHT_DPI');
+
+                    foreach ($imagesTypes as $imageType) {
+                        if (!ImageManager::resize($path, $new_path.'-'.stripslashes($imageType['name']).'.'.$image->image_format, $imageType['width'], $imageType['height'], $image->image_format)) {
+                            d('An error occurred while copying image:').' '.stripslashes($imageType['name']);
+                            continue;
+                        }
+
+                        if ($generate_hight_dpi_images) {
+                            if (!ImageManager::resize($path, $new_path.'-'.stripslashes($imageType['name']).'2x.'.$image->image_format, (int)$imageType['width']*2, (int)$imageType['height']*2, $image->image_format)) {
+                                d('An error occurred while copying image:').' '.stripslashes($imageType['name']);
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                unlink($path);
+                 if (!$image->update()) {
+                    d('Error while updating status');
+                    continue;
+                }
+		}
+	    }
+	    $html .= 'Product added<br/>';
+        } else if ($etsyListingId = Tools::getValue('unsync_product')) {
+	        $psEtsyProduct = Db::getInstance()->getRow('SELECT * FROM '._DB_PREFIX_.'etsy_ps_product where id_etsy_product = '.(int)$etsyListingId);
+		if (!$psEtsyProduct) {
+		   d('cannot unsynv a product that is not sync');
+		}
+		Db::getInstance()->delete(_DB_PREFIX_.'etsy_ps_product', 'id_etsy_product = '.(int)$psEtsyProduct['id_etsy_product']);
+		$psProduct = new Product((int)$psEtsyProduct['id_ps_product']);
+		$psProduct->delete();
+	}
+
+        $html .= '<h4>Etsy products:</h4><table class="table table-striped">
                     <tr>
                         <th>ID</th>
                         <th>Title</th>
@@ -118,7 +189,7 @@ class Etsy extends Module {
                         <th>'.(strlen($product->title) > 100 ? substr($product->title, 0, 100).'...' : $product->title).'</th>
                         <th>'.$product->price.'</th>
                         <th>'.date('Y-m-d H:i:s', $product->creation_tsz).'</th>
-                        <th>'.(isset($etsyProducts[$product->listing_id]) ? '' : '<a href="'.AdminController::$currentIndex.'&configure='.$this->name.'&sync_product='.$product->listing_id.'&token='.Tools::getAdminTokenLite('AdminModules').'">Add</a>').'<a>Remove</a></th>
+                        <th>'.(isset($etsyProducts[$product->listing_id]) ? '<a href="'.AdminController::$currentIndex.'&configure='.$this->name.'&unsync_product='.$product->listing_id.'&token='.Tools::getAdminTokenLite('AdminModules').'">Remove</a>' : '<a href="'.AdminController::$currentIndex.'&configure='.$this->name.'&sync_product='.$product->listing_id.'&token='.Tools::getAdminTokenLite('AdminModules').'">Add</a>').'</th>
                     </tr>';
         }
         return $html.'</table';
